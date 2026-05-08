@@ -1,10 +1,5 @@
 pipeline {
-	agent {
-		docker {
-			image 'maven:3.9.6-eclipse-temurin-17'
-			args '-v /var/run/docker.sock:/var/run/docker.sock'
-		}
-	}
+	agent none
 
 	stages {
 		stage('Checkout code') {
@@ -14,25 +9,27 @@ pipeline {
 			}
 		}
 
-		stage('Build Maven') {
+		stage('Build with Maven') {
+			agent {
+				docker {
+					image 'maven:3.9.6-eclipse-temurin-17'
+				}
+			}
 			steps {
 				// Run Maven build
 				sh 'mvn clean package -DskipTests'
 			}
 		}
 
-		stage('Build Docker Images') {
-			steps {
-				script {
-					// Build Docker image using the artifact
-					sh 'docker compose build'
+		stage('Docker Build and Deploy') {
+			agent {
+				docker {
+					image 'docker:26.1.0-cli'
+					args '-v /var/run/docker.sock:/var/run/docker.sock'
 				}
 			}
-		}
-
-		stage('Deploy') {
 			steps {
-				sh 'docker compose up -d'
+				sh 'docker compose build'
 			}
 		}
 	}
