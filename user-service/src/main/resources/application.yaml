@@ -21,5 +21,6 @@ server:
 
 eureka:
   client:
+    enabled: false
     service-url:
       defaultZone: http://discovery-server:8761/eureka
